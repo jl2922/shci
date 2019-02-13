@@ -109,20 +109,23 @@ if args.pair_contrib:
             zs_std = zs[i].std()
             zs2 = (zs[i] - zs_mean) / zs_std
             succeed = False
-            for ii in range(-15, 15, 3):
-                for jj in range(-15, 15, 3):
+            for ii in range(-50, 50, 5):
+                for jj in range(-50, 50, 5):
                     try:
                         popt, pcov = curve_fit(func, x, zs2, sigma=1 / weights, p0=[ii, jj, 0])
+                        if not np.sqrt(pcov[0][0] + pcov[1][1] + 2 * pcov[0][1]) * zs_std * tt < 0.0020:
+                            # print(pcov)
+                            continue
                         succeed = True
                         break
-                    except:
+                    except Exception as e:
+                        # print(e)
                         pass
                 if succeed:
                     break
             if not succeed:
                 print('Failed')
                 exit(0)
-            print(popt)
             energy = (popt[0] + popt[1]) * zs_std + zs_mean
             uncert = np.sqrt(pcov[0][0] + pcov[1][1] + 2 * pcov[0][1]) * zs_std * tt
         df_out['pair_contrib'].values[i] = energy
@@ -138,10 +141,12 @@ energy = fit.params[0]
 uncert = predict['mean_ci_upper'] - predict['mean']
 if args.exponential:
     succeed = False
-    for ii in range(-15, 15, 3):
-        for jj in range(-15, 15, 3):
+    for ii in range(-50, 50, 3):
+        for jj in range(-50, 50, 3):
             try:
                 popt, pcov = curve_fit(func, x, y, sigma=1 / weights, p0=[ii, jj, 0])
+                if not np.sqrt(pcov[0][0] + pcov[1][1] + 2 * pcov[0][1]) * y_std * tt < 0.010:
+                    continue
                 succeed = True
                 break
             except:
