@@ -178,14 +178,16 @@ void Solver<S>::run_all_variations() {
       Timer::start("main");
       run_variation(eps_var);
       Result::put<double>(Util::str_printf("energy_var/%#.2e", eps_var), system.energy_var);
+      Result::put<size_t>(Util::str_printf("n_dets/%#.2e", eps_var), system.dets.size());
       Timer::end();
       save_variation_result(filename);
     } else {
       eps_tried_prev.clear();
       var_dets.clear();
       for (const auto& det : system.dets) var_dets.set(det);
-      //      hamiltonian.clear();
+      hamiltonian.clear();
       Result::put<double>(Util::str_printf("energy_var/%#.2e", eps_var), system.energy_var);
+      Result::put<size_t>(Util::str_printf("n_dets/%#.2e", eps_var), system.dets.size());
     }
 
     if (Parallel::is_master() && get_pair_contrib) {
@@ -195,7 +197,7 @@ void Solver<S>::run_all_variations() {
     Timer::end();
   }
 
-  //  hamiltonian.clear();
+  hamiltonian.clear();
   eps_tried_prev.clear();
   eps_tried_prev.shrink_to_fit();
   var_dets.clear_and_shrink();
