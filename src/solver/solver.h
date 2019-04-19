@@ -807,7 +807,7 @@ UncertResult Solver<S>::get_energy_pt_sto(
     hc_sums.clear();
     Timer::end();
     iteration++;
-    if (iteration >= 6 && (energy_pt_sto + energy_pt_psto).uncert <= target_error * 0.5) {
+    if (iteration >= 6 && energy_pt_sto.uncert <= target_error * 0.7) {
       break;
     }
     if (iteration >= 10 && (energy_pt_sto + energy_pt_psto).uncert <= target_error) {
@@ -1000,6 +1000,7 @@ void Solver<S>::print_dets_info() const {
     }
     printf("%-10u%12zu%16.8f\n", i, excitations[i], weights[i]);
   }
+  return;
 
   // Print orb occupations.
   std::vector<double> orb_occupations(system.n_orbs, 0.0);
