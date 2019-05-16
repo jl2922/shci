@@ -1001,7 +1001,6 @@ void Solver<S>::print_dets_info() const {
     }
     printf("%-10u%12zu%16.8f\n", i, excitations[i], weights[i]);
   }
-  return;
 
   // Print orb occupations.
   std::vector<double> orb_occupations(system.n_orbs, 0.0);
@@ -1040,11 +1039,6 @@ void Solver<S>::print_dets_info() const {
     return a > b;
   };
   std::priority_queue<size_t, std::vector<size_t>, decltype(comp)> det_ordered(comp, det_order);
-  /*
-  std::stable_sort(det_order.begin(), det_order.end(), [&](const size_t a, const size_t b) {
-    return std::abs(system.coefs[a]) > std::abs(system.coefs[b]);
-  });
-  */
   printf("%-10s%12s      %-12s\n", "Excite Lv", "Coef", "Det (Reordered orb)");
   for (size_t i = 0; i < std::min((size_t)20, system.dets.size()); i++) {
     size_t ordered_i = det_ordered.top();
