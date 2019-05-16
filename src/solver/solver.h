@@ -14,6 +14,7 @@
 #include <functional>
 #include <numeric>
 #include <unordered_set>
+#include <queue>
 
 #include "../config.h"
 #include "../det/det.h"
@@ -1000,10 +1001,11 @@ void Solver<S>::print_dets_info() const {
 
   // Print orb occupations.
   std::vector<double> orb_occupations(system.n_orbs, 0.0);
-  for (size_t i = 0; i < system.dets.size(); i++) {
-    const auto& det = system.dets[i];
-    const double coef = system.coefs[i];
-    for (unsigned j = 0; j < system.n_orbs; j++) {
+#pragma omp parallel for schedule(static, 1)
+  for (unsigned j = 0; j < system.n_orbs; j++) {
+    for (size_t i = 0; i < system.dets.size(); i++) {
+      const auto& det = system.dets[i];
+      const double coef = system.coefs[i];
       if (det.up.has(j)) {
         orb_occupations[j] += coef * coef;
       }
@@ -1027,13 +1029,24 @@ void Solver<S>::print_dets_info() const {
   for (size_t i = 0; i < system.dets.size(); i++) {
     det_order[i] = i;
   }
+  const auto& comp = [&](const size_t a, const size_t b) {
+    if (std::abs(system.coefs[a]) != std::abs(system.coefs[b])) {
+      return std::abs(system.coefs[a]) < std::abs(system.coefs[b]);
+    }
+    return a > b;
+  };
+  std::priority_queue<size_t, std::vector<size_t>, decltype(comp)> det_ordered(comp, det_order);
+  /*
   std::stable_sort(det_order.begin(), det_order.end(), [&](const size_t a, const size_t b) {
     return std::abs(system.coefs[a]) > std::abs(system.coefs[b]);
   });
+  */
   printf("%-10s%12s      %-12s\n", "Excite Lv", "Coef", "Det (Reordered orb)");
   for (size_t i = 0; i < std::min((size_t)20, system.dets.size()); i++) {
-    const double coef = system.coefs[det_order[i]];
-    const auto& det = system.dets[det_order[i]];
+    size_t ordered_i = det_ordered.top();
+    det_ordered.pop();
+    const double coef = system.coefs[ordered_i];
+    const auto& det = system.dets[ordered_i];
     const auto& occs_up = det.up.get_occupied_orbs();
     const auto& occs_dn = det.dn.get_occupied_orbs();
     const unsigned n_excite = det_hf.up.n_diffs(det.up) + det_hf.dn.n_diffs(det.dn);
