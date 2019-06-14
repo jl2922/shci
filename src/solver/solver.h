@@ -420,6 +420,7 @@ double Solver<S>::get_energy_pt_dtm(const double eps_var) {
     n_batches =
         static_cast<size_t>(ceil(2.5 * 128 * 100 * n_pt_dets * bytes_per_entry / pt_mem_avail));
     if (n_batches == 0) n_batches = 1;
+    fgpl::broadcast(n_batches);
     if (Parallel::is_master()) {
       printf("Number of dtm batches: %zu\n", n_batches);
     }
@@ -537,6 +538,7 @@ UncertResult Solver<S>::get_energy_pt_psto(const double eps_var, const double en
     n_batches = static_cast<size_t>(
         ceil(2.5 * 128 * 100 * n_pt_dets * bytes_per_entry / (pt_mem_avail * mem_usage)));
     if (n_batches < 16) n_batches = 16;
+    fgpl::broadcast(n_batches);
     if (Parallel::is_master()) {
       printf("Number of psto batches: %zu\n", n_batches);
     }
