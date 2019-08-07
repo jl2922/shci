@@ -320,7 +320,7 @@ template <class S>
 void Solver<S>::run_perturbation(const double eps_var) {
   double default_eps_pt_dtm = 2.0e-6;
   double default_eps_pt_psto = 1.0e-7;
-  double default_eps_pt = eps_var * 1.0e-6;
+  double default_eps_pt = 1.0e-20;
   if (system.type == SystemType::HEG) {
     default_eps_pt_psto = default_eps_pt_dtm;
     default_eps_pt = eps_var * 1.0e-20;
